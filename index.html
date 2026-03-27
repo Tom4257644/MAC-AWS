@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NZ Uni Review</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #0056b3;
@@ -154,6 +155,35 @@
             border-radius: 6px;
         }
 
+        /* PAGINATION STYLING */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .pagination button:hover {
+            background: #f0f0f0;
+        }
+
+        .pagination button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
         /* FORMS & INPUT GROUPS */
         .form-group {
             margin-bottom: 1rem;
@@ -186,13 +216,6 @@
             display: none;
         }
 
-        .disclaimer {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 8px;
-            font-style: italic;
-        }
-
         #admin-login {
             text-align: center;
             margin-top: 10vh;
@@ -216,54 +239,22 @@
                 text-align: center;
             }
 
-            .filters {
-                flex-direction: row;
-                gap: 0.5rem;
-            }
-
             .filters select {
                 flex: 1 1 calc(50% - 0.5rem);
-                padding: 0.5rem;
-                font-size: 0.9rem;
-            }
-
-            #course-sort-select {
-                flex: 1 1 100%;
-                background-color: #eef5fa;
-                border-color: var(--primary);
-                font-weight: bold;
             }
 
             .input-group {
                 flex-direction: column;
             }
+        }
 
-            .input-group input,
-            .input-group select,
-            .input-group button {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 0.5rem;
-                font-size: 0.9rem;
-            }
-
-            .rating-row {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            .rating-row button {
-                width: auto;
-                flex-grow: 1;
-            }
-
-            .rating-badge {
-                font-size: 1.2rem;
-            }
-
-            .course-stats span {
-                font-size: 0.95rem;
-            }
+        .coming-soon-container {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            border: 2px dashed #ccc;
+            color: #888;
         }
     </style>
 </head>
@@ -285,11 +276,12 @@
         <div id="prof-view" class="view-section active">
             <h2>Find a Professor</h2>
             <div class="filters">
-                <select id="uni-select" onchange="updateProfs()"></select>
-                <select id="major-select" onchange="updateProfs()"></select>
+                <select id="uni-select" onchange="resetProfPage()"></select>
+                <select id="subject-select" onchange="resetProfPage()"></select>
             </div>
 
             <div id="prof-list"></div>
+            <div id="prof-pagination" class="pagination"></div>
 
             <hr style="margin: 3rem 0; border: 0; border-top: 1px solid #ddd;">
 
@@ -298,7 +290,7 @@
                 <div class="form-group input-group">
                     <input type="text" id="new-prof-name" placeholder="Professor Name" class="flex-grow">
                     <select id="new-prof-uni"></select>
-                    <select id="new-prof-major"></select>
+                    <select id="new-prof-subject"></select>
                 </div>
                 <button class="btn" onclick="submitNewProf()" style="width: 100%; margin-top: 0.5rem;">Submit for
                     Approval</button>
@@ -312,347 +304,271 @@
             <h2>Easiest Courses Ranked</h2>
 
             <div class="filters">
-                <select id="course-uni-select" onchange="updateCourses()"></select>
-                <select id="course-major-select" onchange="updateCourses()"></select>
-                <select id="course-level-select" onchange="updateCourses()">
+                <select id="course-uni-select" onchange="resetCoursePage()"></select>
+                <select id="course-subject-select" onchange="resetCoursePage()"></select>
+                <select id="course-level-select" onchange="resetCoursePage()">
                     <option value="All">All Levels</option>
                     <option value="100">100-Level</option>
                     <option value="200">200-Level</option>
                     <option value="300">300-Level</option>
+                    <option value="400">400-Level</option>
                 </select>
-                <select id="course-sort-select" onchange="updateCourses()"
+                <select id="course-sort-select" onchange="resetCoursePage()"
                     style="background-color: #eef5fa; border-color: var(--primary); font-weight: bold;">
-                    <option value="bPlusOrHigherPercent">Rank by B+ or Higher %</option>
-                    <option value="aPlusPercent">Rank by A+ %</option>
-                    <option value="passPercent">Rank by Pass Rate %</option>
+                    <option value="bPlusOrHigherPercent">Rank by % of studends who get B+ or higher</option>
+                    <option value="aPlusPercent">Rank by % of students who get A+</option>
+                    <option value="passPercent">Rank by % of students who pass</option>
                 </select>
             </div>
 
             <div id="course-list"></div>
-        </div>
-
-        <div id="admin-view" class="view-section">
-            <div id="admin-login">
-                <h2>Admin Login Required</h2>
-                <div class="input-group" style="max-width: 400px; margin: 0 auto;">
-                    <input type="password" id="admin-pass" placeholder="Password (hint: admin)" class="flex-grow">
-                    <button class="btn" onclick="checkAdmin()">Login</button>
-                </div>
-            </div>
-            <div id="admin-dashboard" style="display: none;">
-                <h2>Admin Dashboard</h2>
-                <h3>Pending Professor Approvals</h3>
-                <div id="pending-list"></div>
-            </div>
+            <div id="course-pagination" class="pagination"></div>
         </div>
 
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <script>
-        // --- GOOGLE SHEETS API URL ---
-        // PASTE YOUR ACTUAL URL HERE:
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec";
 
-        // --- THE UNBREAKABLE SENDER FUNCTION ---
-        function sendToGoogle(dataObj) {
+        const ALL_NZ_UNIS = [
+            "University of Auckland",
+            "AUT (Auckland University of Technology)",
+            "University of Waikato",
+            "Massey University",
+            "Victoria University of Wellington",
+            "University of Canterbury",
+            "Lincoln University",
+            "University of Otago"
+        ];
 
-            // Creates an invisible form, fills it with data, and fires it to the iframe
-            const form = document.createElement('form');
-            form.action = GOOGLE_SCRIPT_URL;
-            form.method = 'GET';
-            form.target = 'hidden_iframe';
-            form.style.display = 'none';
-
-            for (const key in dataObj) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = dataObj[key];
-                form.appendChild(input);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
-
-            // Clean up the invisible form after 2 seconds
-            setTimeout(() => form.remove(), 2000);
-        }
-
-        // --- 1. INITIAL DATABASE & TRACKERS ---
-        const defaultData = {
-            unis: ["University of Auckland", "AUT", "Victoria University of Wellington"],
-            majors: ["Statistics", "Finance", "Computer Science", "Accounting"],
-            professors: [
-                { id: 1, name: "Dr. Alan Turing", uni: "University of Auckland", major: "Computer Science", ratings: [8, 9, 10], comments: ["Great lecturer!"] },
-                { id: 2, name: "Prof. John Nash", uni: "University of Auckland", major: "Finance", ratings: [5, 6], comments: ["Tough exams."] },
-                { id: 3, name: "Dr. Florence Nightingale", uni: "AUT", major: "Statistics", ratings: [10, 10], comments: ["Explains R perfectly."] }
-            ],
-            courses: [
-                { id: 1, code: "STATS 101", name: "Intro to Statistics", uni: "University of Auckland", major: "Statistics", level: "100", aPlusPercent: 15, bPlusOrHigherPercent: 42, passPercent: 88 },
-                { id: 2, code: "FIN 201", name: "Corporate Finance", uni: "University of Auckland", major: "Finance", level: "200", aPlusPercent: 8, bPlusOrHigherPercent: 25, passPercent: 76 },
-                { id: 3, code: "COMP 101", name: "Programming Basics", uni: "AUT", major: "Computer Science", level: "100", aPlusPercent: 20, bPlusOrHigherPercent: 55, passPercent: 92 }
-            ],
-            pendingProfs: []
+        // --- GLOBAL DATABASE & PAGINATION STATE ---
+        let db = {
+            unis: ALL_NZ_UNIS,
+            subjects: [],
+            professors: [],
+            courses: [],
         };
 
-        let db = JSON.parse(localStorage.getItem('nz_uni_db')) || defaultData;
-
-        let needsSave = false;
-        db.courses.forEach(c => {
-            if (c.bPlusOrHigherPercent === undefined || c.passPercent === undefined) {
-                const updatedCourse = defaultData.courses.find(dc => dc.id === c.id);
-                if (updatedCourse) {
-                    c.bPlusOrHigherPercent = updatedCourse.bPlusOrHigherPercent;
-                    c.passPercent = updatedCourse.passPercent;
-                } else {
-                    c.bPlusOrHigherPercent = 50;
-                    c.passPercent = 85;
-                }
-                needsSave = true;
-            }
-        });
-        if (needsSave) {
-            localStorage.setItem('nz_uni_db', JSON.stringify(db));
-        }
+        const ITEMS_PER_PAGE = 10;
+        let currentPageProf = 1;
+        let currentPageCourse = 1;
 
         let ratedProfs = JSON.parse(localStorage.getItem('rated_profs_tracker')) || [];
 
-        function saveDB() {
-            localStorage.setItem('nz_uni_db', JSON.stringify(db));
+        async function loadDataFromExcel() {
+            try {
+                const response = await fetch('uniStatsData.xlsx');
+                if (!response.ok) throw new Error("Could not find uniStatsData.xlsx.");
+
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+                const profSheet = workbook.Sheets['professors'];
+                const rawProfs = XLSX.utils.sheet_to_json(profSheet);
+
+                const ratingSheet = workbook.Sheets['ratings'];
+                const rawRatings = XLSX.utils.sheet_to_json(ratingSheet);
+
+                const courseSheet = workbook.Sheets['courseData'];
+                const rawCourses = XLSX.utils.sheet_to_json(courseSheet);
+
+                db.professors = rawProfs.map(p => {
+                    const profRatings = rawRatings.filter(r => r['Prof ID'] == p['Professor ID']);
+                    return {
+                        id: p['Professor ID'],
+                        name: p['Name'],
+                        uni: p['University'],
+                        subject: p['Subject'],
+                        ratings: profRatings.map(r => r['Rating']),
+                        comments: profRatings.map(r => r['Comment']).filter(c => c)
+                    };
+                });
+
+                db.courses = rawCourses.map((c, index) => ({
+                    id: index,
+                    code: c['course'],
+                    name: c['course'],
+                    uni: "University of Auckland",
+                    subject: c['subject'],
+                    level: String(c['level']),
+                    aPlusPercent: parseFloat(c['a+%'] * 100) || 0,
+                    bPlusOrHigherPercent: parseFloat(c['>=b+%'] * 100) || 0,
+                    passPercent: parseFloat(c['pass%'] * 100) || 0
+                }));
+
+                db.subjects = [...new Set([...db.professors.map(p => p.subject), ...db.courses.map(c => c.subject)])];
+
+                initFilters();
+                updateProfs();
+                updateCourses();
+            } catch (error) {
+                console.error("Error loading Excel:", error);
+                initFilters();
+            }
         }
 
-        // --- 2. ROUTING & VIEWS ---
+        function initFilters() {
+            const populate = (id, arr, defaultText = "All") => {
+                const select = document.getElementById(id);
+                if (!select) return;
+                select.innerHTML = `<option value="All">${defaultText}</option>` +
+                    arr.map(item => `<option value="${item}">${item}</option>`).join('');
+            };
+
+            populate('uni-select', db.unis, "All Universities");
+            populate('subject-select', db.subjects, "All Subjects");
+            populate('new-prof-uni', db.unis, "Select University");
+            populate('new-prof-subject', db.subjects, "Select Subject");
+            populate('course-uni-select', db.unis, "All Universities");
+            populate('course-subject-select', db.subjects, "All Subject");
+        }
+
+        // --- PAGINATION HELPERS ---
+        function resetProfPage() { currentPageProf = 1; updateProfs(); }
+        function resetCoursePage() { currentPageCourse = 1; updateCourses(); }
+
+        function renderPaginationControls(containerId, totalItems, currentPage, updateFnName) {
+            const container = document.getElementById(containerId);
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+            container.innerHTML = "";
+
+            if (totalPages <= 1) return;
+
+            // Helper to change page and scroll
+            const goToPage = (page) => {
+                if (page < 1 || page > totalPages) return;
+                if (updateFnName === 'prof') { currentPageProf = page; updateProfs(); }
+                else { currentPageCourse = page; updateCourses(); }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            // --- PREVIOUS BUTTON ---
+            const prevBtn = document.createElement('button');
+            prevBtn.innerText = "« Prev";
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => goToPage(currentPage - 1);
+            container.appendChild(prevBtn);
+
+            // --- PAGE NUMBERS (Smart Window) ---
+            // Show first page, last page, and 2 pages around current page
+            const range = 2;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - range && i <= currentPage + range)) {
+                    const btn = document.createElement('button');
+                    btn.innerText = i;
+                    if (i === currentPage) btn.className = 'active';
+                    btn.onclick = () => goToPage(i);
+                    container.appendChild(btn);
+                } else if (i === currentPage - range - 1 || i === currentPage + range + 1) {
+                    // Add ellipses
+                    const span = document.createElement('span');
+                    span.innerText = "...";
+                    span.style.padding = "0.5rem";
+                    container.appendChild(span);
+                }
+            }
+
+            // --- NEXT BUTTON ---
+            const nextBtn = document.createElement('button');
+            nextBtn.innerText = "Next »";
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => goToPage(currentPage + 1);
+            container.appendChild(nextBtn);
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function updateProfs() {
+            const uni = document.getElementById('uni-select').value;
+            const maj = document.getElementById('subject-select').value;
+            const list = document.getElementById('prof-list');
+            const pagContainer = document.getElementById('prof-pagination');
+
+            if (uni !== "All" && uni !== "University of Auckland") {
+                list.innerHTML = `<div class="coming-soon-container"><h2>🚀 Coming Soon</h2><p>Data for <strong>${uni}</strong> is coming soon.</p></div>`;
+                pagContainer.innerHTML = "";
+                return;
+            }
+
+            let filtered = db.professors.filter(p =>
+                (uni === 'All' || p.uni === uni) && (maj === 'All' || p.subject === maj)
+            );
+
+            // Paginate
+            const start = (currentPageProf - 1) * ITEMS_PER_PAGE;
+            const paginatedItems = filtered.slice(start, start + ITEMS_PER_PAGE);
+
+            list.innerHTML = paginatedItems.map(p => {
+                const avg = p.ratings.length ? (p.ratings.reduce((a, b) => a + b, 0) / p.ratings.length).toFixed(1) : 'N/A';
+                const isRated = ratedProfs.includes(p.id);
+                return `
+                <div class="card">
+                    <h3><span>${p.name}</span><span class="rating-badge">★ ${avg}</span></h3>
+                    <p style="margin-top: -5px; color: #666;">${p.uni} | ${p.subject}</p>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                        ${p.comments.map(c => `<div style="margin-bottom: 0.3rem; font-style: italic;">"${c}"</div>`).join('') || "No comments yet."}
+                    </div>
+                    ${isRated ? `<p style="color: green; font-weight: bold;">✓ Rated</p>` : `
+                        <div id="rate-action-${p.id}" class="input-group">
+                            <input type="number" id="rate-val-${p.id}" min="0" max="10" placeholder="⭐" style="width: 60px;">
+                            <input type="text" id="rate-com-${p.id}" placeholder="Comment..." class="flex-grow">
+                            <button class="btn" onclick="initiateRating(${p.id})">Rate</button>
+                        </div>
+                    `}
+                </div>`;
+            }).join('') || '<p>No results found.</p>';
+
+            renderPaginationControls('prof-pagination', filtered.length, currentPageProf, 'prof');
+        }
+
+        function updateCourses() {
+            const uni = document.getElementById('course-uni-select').value;
+            const maj = document.getElementById('course-subject-select').value;
+            const lvl = document.getElementById('course-level-select').value;
+            const sortMetric = document.getElementById('course-sort-select').value;
+            const list = document.getElementById('course-list');
+            const pagContainer = document.getElementById('course-pagination');
+
+            if (uni !== "All" && uni !== "University of Auckland") {
+                list.innerHTML = `<div class="coming-soon-container"><h2>📊 Data Coming Soon</h2><p>Ranking data for <strong>${uni}</strong> is being processed.</p></div>`;
+                pagContainer.innerHTML = "";
+                return;
+            }
+
+            let filtered = db.courses.filter(c =>
+                (uni === 'All' || c.uni === uni) && (maj === 'All' || c.subject === maj) && (lvl === 'All' || c.level === lvl)
+            );
+
+            filtered.sort((a, b) => b[sortMetric] - a[sortMetric]);
+
+            const start = (currentPageCourse - 1) * ITEMS_PER_PAGE;
+            const paginatedItems = filtered.slice(start, start + ITEMS_PER_PAGE);
+
+            list.innerHTML = paginatedItems.map((c, index) => `
+                <div class="card">
+                    <h3 style="margin-bottom: 0.5rem;">#${start + index + 1} — ${c.code}</h3>
+                    <p style="margin: 0; color: #666;">${c.subject} | Level: ${c.level}</p>
+                    <div class="course-stats">
+                        <span>${c.aPlusPercent.toFixed(0)}% get A+</span>
+                        <span>${c.bPlusOrHigherPercent.toFixed(0)}% get B+ or higher</span>
+                        <span>${c.passPercent.toFixed()}% Pass</span>
+                    </div>
+                </div>
+            `).join('') || '<p>No results found.</p>';
+
+            renderPaginationControls('course-pagination', filtered.length, currentPageCourse, 'course');
+        }
+
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
-
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-nav'));
             if (viewId === 'prof-view') document.getElementById('nav-prof').classList.add('active-nav');
             if (viewId === 'course-view') document.getElementById('nav-course').classList.add('active-nav');
         }
 
-        function checkHash() {
-            if (window.location.hash === '#admin') switchView('admin-view');
-            else switchView('prof-view');
-        }
-        window.addEventListener('hashchange', checkHash);
-
-        // --- 3. RENDERING LOGIC ---
-        function initFilters() {
-            const populate = (id, arr, defaultText = "All") => {
-                const select = document.getElementById(id);
-                if (id !== 'course-sort-select') {
-                    select.innerHTML = `<option value="All">${defaultText}</option>` + arr.map(item => `<option value="${item}">${item}</option>`).join('');
-                }
-            };
-
-            populate('uni-select', db.unis, "All Universities");
-            populate('major-select', db.majors, "All Majors");
-            populate('new-prof-uni', db.unis, "Select University");
-            populate('new-prof-major', db.majors, "Select Major");
-            populate('course-uni-select', db.unis, "All Universities");
-            populate('course-major-select', db.majors, "All Majors");
-        }
-
-        function updateProfs() {
-            const uni = document.getElementById('uni-select').value;
-            const maj = document.getElementById('major-select').value;
-
-            let filtered = db.professors.filter(p =>
-                (uni === 'All' || p.uni === uni) &&
-                (maj === 'All' || p.major === maj)
-            );
-
-            const list = document.getElementById('prof-list');
-            list.innerHTML = filtered.map(p => {
-                const avg = p.ratings.length ? (p.ratings.reduce((a, b) => a + b, 0) / p.ratings.length).toFixed(1) : 'N/A';
-
-                let ratingSection = '';
-                if (ratedProfs.includes(p.id)) {
-                    ratingSection = `<p style="color: green; font-weight: bold; margin-top: 1rem;">✓ You have rated this professor.</p>`;
-                } else {
-                    ratingSection = `
-                    <div id="rate-action-${p.id}" class="input-group rating-row" style="margin-top: 1rem;">
-                        <input type="number" id="rate-val-${p.id}" min="0" max="10" placeholder="⭐" style="width: 60px; text-align: center;">
-                        <input type="text" id="rate-com-${p.id}" placeholder="Leave a comment..." class="flex-grow">
-                        <button class="btn" onclick="initiateRating(${p.id})">Rate</button>
-                    </div>
-                    
-                    <div id="email-section-${p.id}" class="email-verification">
-                        <strong>Almost done! Verify you're a student.</strong>
-                        <div class="input-group" style="margin-top: 10px;">
-                            <input type="email" id="email-input-${p.id}" placeholder="Your .ac.nz email address" class="flex-grow">
-                            <button class="btn" onclick="finalizeRating(${p.id})">Send Link</button>
-                        </div>
-                        <p class="disclaimer">We don't collect or track emails, we just don't want people rating more than once.</p>
-                    </div>`;
-                }
-
-                return `
-                <div class="card">
-                    <h3>
-                        <span>${p.name}</span> 
-                        <span class="rating-badge">★ ${avg}</span>
-                    </h3>
-                    <p style="margin-top: -5px; color: #666;">${p.uni} | ${p.major}</p>
-                    
-                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
-                        <strong style="display:block; margin-bottom: 0.5rem; color: #444;">Student Comments:</strong>
-                        ${p.comments.map(c => `<div style="margin-bottom: 0.3rem; font-style: italic;">"${c}"</div>`).join('') || "No comments yet. Be the first!"}
-                    </div>
-                    ${ratingSection}
-                </div>`;
-            }).join('') || '<p style="text-align:center; padding: 2rem; color: #666;">No professors found matching those filters.</p>';
-        }
-
-        function updateCourses() {
-            const uni = document.getElementById('course-uni-select').value;
-            const maj = document.getElementById('course-major-select').value;
-            const lvl = document.getElementById('course-level-select').value;
-            const sortMetric = document.getElementById('course-sort-select').value;
-
-            let filtered = db.courses.filter(c =>
-                (uni === 'All' || c.uni === uni) &&
-                (maj === 'All' || c.major === maj) &&
-                (lvl === 'All' || c.level === lvl)
-            );
-
-            filtered.sort((a, b) => b[sortMetric] - a[sortMetric]);
-
-            const list = document.getElementById('course-list');
-            list.innerHTML = filtered.map((c, index) => {
-                return `
-                <div class="card">
-                    <h3 style="margin-bottom: 0.5rem;">#${index + 1} &mdash; ${c.code}: ${c.name}</h3>
-                    <p style="margin: 0; color: #666;">${c.uni} | ${c.major} | Level: ${c.level}</p>
-                    <div class="course-stats">
-                        <span style="font-size: 1.1rem; color: black;"><strong>${c.bPlusOrHigherPercent}%</strong> got B+ or higher</span>
-                        <span style="font-size: 1.1rem; color: black;"><strong>${c.aPlusPercent}%</strong> got A+</span>
-                        <span style="font-size: 1.1rem; color: black;"><strong>${c.passPercent}%</strong> passed</span>
-                    </div>
-                </div>`;
-            }).join('') || '<p style="text-align:center; padding: 2rem; color: #666;">No courses found matching those filters.</p>';
-        }
-
-        // --- 4. INTERACTIONS & LIVE GOOGLE SYNC ---
-        function initiateRating(id) {
-            const scoreInput = document.getElementById(`rate-val-${id}`).value;
-            if (scoreInput === '' || scoreInput < 0 || scoreInput > 10) {
-                alert("Please enter a valid rating between 0 and 10.");
-                return;
-            }
-            document.getElementById(`rate-action-${id}`).style.display = 'none';
-            document.getElementById(`email-section-${id}`).style.display = 'block';
-        }
-
-        function finalizeRating(id) {
-            const email = document.getElementById(`email-input-${id}`).value.trim().toLowerCase();
-
-            if (!email.endsWith('.ac.nz')) {
-                alert("Please enter a valid New Zealand university email ending in .ac.nz");
-                return;
-            }
-
-            const score = parseInt(document.getElementById(`rate-val-${id}`).value);
-            const comment = document.getElementById(`rate-com-${id}`).value.trim();
-
-            // FIRE THE UNBREAKABLE FORM SCRIPT
-            sendToGoogle({
-                action: "addRating",
-                profId: id,
-                rating: score,
-                comment: comment,
-                email: email
-            });
-
-            // Keep local tracking active to instantly update the UI for the user
-            const prof = db.professors.find(p => p.id === id);
-            prof.ratings.push(score);
-            if (comment !== '') prof.comments.push(comment);
-            saveDB();
-
-            ratedProfs.push(id);
-            localStorage.setItem('rated_profs_tracker', JSON.stringify(ratedProfs));
-
-            alert(`Verification link sent to ${email}!\n\nYour rating has been sent to the admin for moderation.`);
-            updateProfs();
-        }
-
-        function submitNewProf() {
-            const name = document.getElementById('new-prof-name').value.trim();
-            const uni = document.getElementById('new-prof-uni').value;
-            const maj = document.getElementById('new-prof-major').value;
-
-            if (!name || uni === 'All' || maj === 'All') {
-                alert("Please type a name and select a specific University and Major to submit.");
-                return;
-            }
-
-            // FIRE THE UNBREAKABLE FORM SCRIPT
-            sendToGoogle({
-                action: "addProfessor",
-                name: name,
-                uni: uni,
-                major: maj
-            });
-
-            // Keep local dashboard prototype active
-            db.pendingProfs.push({ name, uni, major: maj });
-            saveDB();
-
-            document.getElementById('new-prof-name').value = '';
-            document.getElementById('new-prof-uni').value = 'All';
-            document.getElementById('new-prof-major').value = 'All';
-
-            document.getElementById('prof-msg').style.display = 'block';
-            setTimeout(() => document.getElementById('prof-msg').style.display = 'none', 3000);
-        }
-
-        // --- 5. LOCAL ADMIN CONTROLS (PROTOTYPE ONLY) ---
-        function checkAdmin() {
-            if (document.getElementById('admin-pass').value === 'admin') {
-                document.getElementById('admin-login').style.display = 'none';
-                document.getElementById('admin-dashboard').style.display = 'block';
-                renderAdmin();
-            } else {
-                alert("Incorrect password");
-            }
-        }
-
-        function renderAdmin() {
-            const list = document.getElementById('pending-list');
-            list.innerHTML = db.pendingProfs.map((p, index) => `
-                <div class="card">
-                    <h4 style="margin-top: 0;">${p.name}</h4>
-                    <p>${p.uni} | ${p.major}</p>
-                    <div style="display:flex; gap: 10px;">
-                        <button class="btn" style="background: #28a745; flex: 1;" onclick="approveProf(${index})">Approve</button>
-                        <button class="btn" style="background: #dc3545; flex: 1;" onclick="rejectProf(${index})">Reject</button>
-                    </div>
-                </div>
-            `).join('') || '<p>No pending approvals.</p>';
-        }
-
-        function approveProf(index) {
-            const p = db.pendingProfs[index];
-            db.professors.push({ id: Date.now(), name: p.name, uni: p.uni, major: p.major, ratings: [], comments: [] });
-            db.pendingProfs.splice(index, 1);
-            saveDB();
-            renderAdmin();
-        }
-
-        function rejectProf(index) {
-            db.pendingProfs.splice(index, 1);
-            saveDB();
-            renderAdmin();
-        }
-
-        // --- INIT ---
-        initFilters();
-        updateProfs();
-        updateCourses();
-        checkHash();
-
+        loadDataFromExcel();
     </script>
 </body>
 
