@@ -361,6 +361,57 @@
 
         // --- FIXED VERSION OF YOUR CODE ---
 
+
+        function submitRating(profId) {
+            const scoreInput = document.getElementById(`rate-val-${profId}`).value;
+            const comment = document.getElementById(`rate-com-${profId}`).value.trim();
+
+            if (scoreInput === '' || scoreInput < 0 || scoreInput > 10) {
+                alert("Please enter a rating between 0 and 10.");
+                return;
+            }
+
+            const scriptId = `jsonp-submit-rating-${profId}`;
+
+            // Remove old script if it exists
+            const oldScript = document.getElementById(scriptId);
+            if (oldScript) oldScript.remove();
+
+            const url = new URL(GOOGLE_SCRIPT_URL);
+            url.searchParams.append('action', 'addRating');
+            url.searchParams.append('profId', profId);
+            url.searchParams.append('rating', scoreInput);
+            url.searchParams.append('comment', comment);
+            url.searchParams.append('callback', 'handleRatingResponse'); // JSONP
+
+            const script = document.createElement('script');
+            script.src = url;
+            script.id = scriptId;
+            document.body.appendChild(script);
+
+            // JSONP callback
+            window.handleRatingResponse = function (response) {
+                if (response === "Success") {
+                    alert("Rating submitted for admin approval!");
+                    ratedProfs.push(profId);          // Track locally that this prof has been rated
+                    localStorage.setItem('rated_profs_tracker', JSON.stringify(ratedProfs));
+
+                    // Hide rating inputs
+                    const actionDiv = document.getElementById(`rate-action-${profId}`);
+                    if (actionDiv) actionDiv.style.display = 'none';
+                } else {
+                    alert("Failed to submit rating: " + response);
+                }
+
+                // Safely remove the script
+                const scriptTag = document.getElementById(scriptId);
+                if (scriptTag && scriptTag.parentNode) {
+                    scriptTag.parentNode.removeChild(scriptTag);
+                }
+            };
+        }
+
+
         function initiateRating(id) {
             // You need the backticks (`) here so JS knows this is a template with a variable
             const scoreInput = document.getElementById(`rate-val-${id}`).value;
@@ -584,7 +635,7 @@
                         <div id="rate-action-${p.id}" class="input-group">
                             <input type="number" id="rate-val-${p.id}" min="0" max="10" placeholder="⭐" style="width: 60px;">
                             <input type="text" id="rate-com-${p.id}" placeholder="Comment..." class="flex-grow">
-                            <button class="btn" onclick="initiateRating(${p.id})">Rate</button>
+<button class="btn" onclick="submitRating(${p.id})">Rate</button>
                         </div>
                     `}
                 </div>`;
