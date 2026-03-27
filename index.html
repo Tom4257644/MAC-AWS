@@ -379,7 +379,7 @@
             alert("Rating captured! (Note: Add an email-section div to your HTML to show a custom message here).");
         }
 
-        async function submitNewProf() {
+        function submitNewProf() {
             const name = document.getElementById('new-prof-name').value.trim();
             const uni = document.getElementById('new-prof-uni').value;
             const subj = document.getElementById('new-prof-subject').value;
@@ -389,29 +389,29 @@
                 return;
             }
 
-            // Build GET URL with parameters matching your doGet(e)
             const url = new URL(GOOGLE_SCRIPT_URL);
             url.searchParams.append('action', 'addProfessor');
             url.searchParams.append('name', name);
             url.searchParams.append('uni', uni);
             url.searchParams.append('subject', subj);
+            url.searchParams.append('callback', 'handleResponse'); // JSONP
 
-            try {
-                const response = await fetch(url, { method: 'GET', mode: 'cors' });
-                const text = await response.text();
+            const script = document.createElement('script');
+            script.src = url;
+            document.body.appendChild(script);
 
-                if (text.includes("Success")) {
-                    // Show success message
+            // JSONP callback
+            window.handleResponse = function (response) {
+                if (response === "Success") {
                     const msg = document.getElementById('prof-msg');
                     msg.style.display = 'block';
                     document.getElementById('new-prof-name').value = '';
                 } else {
-                    alert("Failed to submit: " + text);
+                    alert("Failed to submit: " + response);
                 }
-            } catch (error) {
-                console.error(error);
-                alert("Failed to submit. Check your network or script deployment.");
-            }
+                // Clean up
+                document.body.removeChild(script);
+            };
         }
 
 
