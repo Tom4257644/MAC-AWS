@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NZ Uni Review</title>
+    <title>Uni Stats</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #0056b3;
-            --primary-dark: #003d82;
+            --primary: #5b3535;
+            --primary-dark: #790d06;
             --bg: #f4f7f6;
             --card-bg: #ffffff;
             --text: #333;
@@ -264,9 +264,12 @@
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
     <header>
-        <h1>NZ Uni Review</h1>
+        <h1>
+            <img src="logo.png" alt="Logo" style="height: 2.5em; vertical-align: middle; margin-right: 0.3rem;">
+            Uni Stats
+        </h1>
         <nav>
-            <button id="nav-prof" onclick="switchView('prof-view')" class="active-nav">Professors</button>
+            <button id="nav-prof" onclick="switchView('prof-view')" class="active-nav">Rate a Professor</button>
             <button id="nav-course" onclick="switchView('course-view')">Easiest Courses</button>
         </nav>
     </header>
@@ -275,6 +278,12 @@
 
         <div id="prof-view" class="view-section active">
             <h2>Find a Professor</h2>
+            <h4>These are user-generated opinions only, not verified facts. Content is moderated but not guaranteed
+                to be accurate or
+                complete. Defamatory, harmful, or abusive submissions are not permitted. The website owner assumes no
+                liability
+                and does not endorse any user views.</h4>
+
             <div class="filters">
                 <select id="uni-select" onchange="resetProfPage()"></select>
                 <select id="subject-select" onchange="resetProfPage()"></select>
