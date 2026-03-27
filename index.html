@@ -389,19 +389,26 @@
                 return;
             }
 
+            const scriptId = 'jsonp-submit-prof'; // Unique ID for the script tag
+
+            // Remove old script if it exists
+            const oldScript = document.getElementById(scriptId);
+            if (oldScript) oldScript.remove();
+
             const url = new URL(GOOGLE_SCRIPT_URL);
             url.searchParams.append('action', 'addProfessor');
             url.searchParams.append('name', name);
             url.searchParams.append('uni', uni);
             url.searchParams.append('subject', subj);
-            url.searchParams.append('callback', 'handleResponse'); // JSONP
+            url.searchParams.append('callback', 'handleProfResponse'); // JSONP
 
             const script = document.createElement('script');
             script.src = url;
+            script.id = scriptId;
             document.body.appendChild(script);
 
             // JSONP callback
-            window.handleResponse = function (response) {
+            window.handleProfResponse = function (response) {
                 if (response === "Success") {
                     const msg = document.getElementById('prof-msg');
                     msg.style.display = 'block';
@@ -409,8 +416,12 @@
                 } else {
                     alert("Failed to submit: " + response);
                 }
-                // Clean up
-                document.body.removeChild(script);
+
+                // Safely remove the script
+                const scriptTag = document.getElementById(scriptId);
+                if (scriptTag && scriptTag.parentNode) {
+                    scriptTag.parentNode.removeChild(scriptTag);
+                }
             };
         }
 
