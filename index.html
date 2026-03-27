@@ -382,38 +382,41 @@
         async function submitNewProf() {
             const name = document.getElementById('new-prof-name').value.trim();
             const uni = document.getElementById('new-prof-uni').value;
-            const maj = document.getElementById('new-prof-subject').value;
+            const subj = document.getElementById('new-prof-subject').value;
 
-            if (!name || uni === 'All' || maj === 'All') {
-                alert("Please type a name and select a specific University and Subject to submit.");
+            if (!name || uni === 'All' || subj === 'All') {
+                alert("Please type a name and select a University and Subject.");
                 return;
             }
 
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        action: "addProfessor",
-                        name: name,
-                        uni: uni,
-                        subject: maj
-                    })
-                });
+            // Build GET URL with parameters matching your doGet(e)
+            const url = new URL(GOOGLE_SCRIPT_URL);
+            url.searchParams.append('action', 'addProfessor');
+            url.searchParams.append('name', name);
+            url.searchParams.append('uni', uni);
+            url.searchParams.append('subject', subj);
 
+            try {
+                const response = await fetch(url, { method: 'GET', mode: 'cors' });
                 const text = await response.text();
+
                 if (text.includes("Success")) {
-                    document.getElementById('prof-msg').style.display = 'block';
+                    // Show success message
+                    const msg = document.getElementById('prof-msg');
+                    msg.style.display = 'block';
                     document.getElementById('new-prof-name').value = '';
                 } else {
-                    alert("Error submitting: " + text);
+                    alert("Failed to submit: " + text);
                 }
-
-            } catch (err) {
-                console.error(err);
+            } catch (error) {
+                console.error(error);
                 alert("Failed to submit. Check your network or script deployment.");
             }
         }
+
+
+
+
         async function loadDataFromExcel() {
             try {
                 const response = await fetch('uniStatsData.xlsx');
