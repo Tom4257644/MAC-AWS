@@ -289,7 +289,9 @@
                 <select id="major-select" onchange="updateProfs()"></select>
             </div>
 
-            <div id="prof-list"></div>
+            <div id="prof-list">
+                <p style="text-align:center; padding: 2rem; color: #666;">Loading professors from database...</p>
+            </div>
 
             <hr style="margin: 3rem 0; border: 0; border-top: 1px solid #ddd;">
 
@@ -350,12 +352,10 @@
 
     <script>
         // --- GOOGLE SHEETS API URL ---
-        // PASTE YOUR ACTUAL URL HERE:
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec";
 
-        // --- THE UNBREAKABLE SENDER FUNCTION ---
+        // --- THE UNBREAKABLE SENDER FUNCTION (Write Data) ---
         function sendToGoogle(dataObj) {
-            // Creates an invisible form, fills it with data, and fires it to the iframe
             const form = document.createElement('form');
             form.action = GOOGLE_SCRIPT_URL;
             form.method = 'GET';
@@ -372,20 +372,15 @@
 
             document.body.appendChild(form);
             form.submit();
-
-            // Clean up the invisible form after 2 seconds
             setTimeout(() => form.remove(), 2000);
         }
 
         // --- 1. INITIAL DATABASE & TRACKERS ---
+        // Notice we removed the hardcoded professors array. It will now default to empty until fetched.
         const defaultData = {
             unis: ["University of Auckland", "AUT", "Victoria University of Wellington"],
             majors: ["Statistics", "Finance", "Computer Science", "Accounting"],
-            professors: [
-                { id: 1, name: "Dr. Alan Turing", uni: "University of Auckland", major: "Computer Science", ratings: [8, 9, 10], comments: ["Great lecturer!"] },
-                { id: 2, name: "Prof. John Nash", uni: "University of Auckland", major: "Finance", ratings: [5, 6], comments: ["Tough exams."] },
-                { id: 3, name: "Dr. Florence Nightingale", uni: "AUT", major: "Statistics", ratings: [10, 10], comments: ["Explains R perfectly."] }
-            ],
+            professors: [],
             courses: [
                 { id: 1, code: "STATS 101", name: "Intro to Statistics", uni: "University of Auckland", major: "Statistics", level: "100", aPlusPercent: 15, bPlusOrHigherPercent: 42, passPercent: 88 },
                 { id: 2, code: "FIN 201", name: "Corporate Finance", uni: "University of Auckland", major: "Finance", level: "200", aPlusPercent: 8, bPlusOrHigherPercent: 25, passPercent: 76 },
@@ -395,29 +390,34 @@
         };
 
         let db = JSON.parse(localStorage.getItem('nz_uni_db')) || defaultData;
-
-        let needsSave = false;
-        db.courses.forEach(c => {
-            if (c.bPlusOrHigherPercent === undefined || c.passPercent === undefined) {
-                const updatedCourse = defaultData.courses.find(dc => dc.id === c.id);
-                if (updatedCourse) {
-                    c.bPlusOrHigherPercent = updatedCourse.bPlusOrHigherPercent;
-                    c.passPercent = updatedCourse.passPercent;
-                } else {
-                    c.bPlusOrHigherPercent = 50;
-                    c.passPercent = 85;
-                }
-                needsSave = true;
-            }
-        });
-        if (needsSave) {
-            localStorage.setItem('nz_uni_db', JSON.stringify(db));
-        }
-
         let ratedProfs = JSON.parse(localStorage.getItem('rated_profs_tracker')) || [];
 
         function saveDB() {
             localStorage.setItem('nz_uni_db', JSON.stringify(db));
+        }
+
+        // --- NEW: FETCH PROFESSORS FROM GOOGLE SHEETS ---
+        async function fetchProfessors() {
+            try {
+                // Fetch request pointing to our new Google Script action
+                const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getProfessors", {
+                    method: "GET",
+                    redirect: "follow" // Required for Apps Script redirects
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        db.professors = data; // Overwrite local data with Live Sheet Data
+                        saveDB();
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading live professor data. Falling back to cache.", error);
+            } finally {
+                // Always update the UI, whether we got fresh data or used the cached fallback
+                updateProfs();
+            }
         }
 
         // --- 2. ROUTING & VIEWS ---
@@ -555,7 +555,6 @@
             const score = parseInt(document.getElementById(`rate-val-${id}`).value);
             const comment = document.getElementById(`rate-com-${id}`).value.trim();
 
-            // FIRE THE UNBREAKABLE FORM SCRIPT
             sendToGoogle({
                 action: "addRating",
                 profId: id,
@@ -564,11 +563,13 @@
                 email: email
             });
 
-            // Keep local tracking active to instantly update the UI for the user
+            // Keep local tracking active to instantly update the UI for the user while the sheet updates
             const prof = db.professors.find(p => p.id === id);
-            prof.ratings.push(score);
-            if (comment !== '') prof.comments.push(comment);
-            saveDB();
+            if (prof) {
+                prof.ratings.push(score);
+                if (comment !== '') prof.comments.push(comment);
+                saveDB();
+            }
 
             ratedProfs.push(id);
             localStorage.setItem('rated_profs_tracker', JSON.stringify(ratedProfs));
@@ -587,7 +588,6 @@
                 return;
             }
 
-            // FIRE THE UNBREAKABLE FORM SCRIPT
             sendToGoogle({
                 action: "addProfessor",
                 name: name,
@@ -648,9 +648,11 @@
 
         // --- INIT ---
         initFilters();
-        updateProfs();
         updateCourses();
         checkHash();
+
+        // Trigger the live data fetch immediately
+        fetchProfessors();
 
     </script>
 </body>
