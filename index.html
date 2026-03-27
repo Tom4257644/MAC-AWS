@@ -348,8 +348,8 @@
 
     <script>
         // --- GOOGLE SHEETS API URL ---
-        // Replace this with your actual Google Apps Script Web App URL
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec";
+        // PASTE YOUR ACTUAL URL HERE:
+        const GOOGLE_SCRIPT_URL = "YOUR_WEB_APP_URL_HERE";
 
         // --- 1. INITIAL DATABASE & TRACKERS ---
         const defaultData = {
@@ -368,10 +368,8 @@
             pendingProfs: []
         };
 
-        // Load DB
         let db = JSON.parse(localStorage.getItem('nz_uni_db')) || defaultData;
 
-        // --- DATA MIGRATION SCRIPT ---
         let needsSave = false;
         db.courses.forEach(c => {
             if (c.bPlusOrHigherPercent === undefined || c.passPercent === undefined) {
@@ -389,7 +387,6 @@
         if (needsSave) {
             localStorage.setItem('nz_uni_db', JSON.stringify(db));
         }
-        // -----------------------------
 
         let ratedProfs = JSON.parse(localStorage.getItem('rated_profs_tracker')) || [];
 
@@ -424,10 +421,8 @@
 
             populate('uni-select', db.unis, "All Universities");
             populate('major-select', db.majors, "All Majors");
-
             populate('new-prof-uni', db.unis, "Select University");
             populate('new-prof-major', db.majors, "Select Major");
-
             populate('course-uni-select', db.unis, "All Universities");
             populate('course-major-select', db.majors, "All Majors");
         }
@@ -512,7 +507,7 @@
             }).join('') || '<p style="text-align:center; padding: 2rem; color: #666;">No courses found matching those filters.</p>';
         }
 
-        // --- 4. INTERACTIONS & BACKEND INTEGRATION ---
+        // --- 4. INTERACTIONS & GOOGLE SHEETS SYNC ---
         function initiateRating(id) {
             const scoreInput = document.getElementById(`rate-val-${id}`).value;
             if (scoreInput === '' || scoreInput < 0 || scoreInput > 10) {
@@ -534,23 +529,25 @@
             const score = parseInt(document.getElementById(`rate-val-${id}`).value);
             const comment = document.getElementById(`rate-com-${id}`).value.trim();
 
-            // Package the data for Google Sheets
+            // Package the data with the specific action tag
             const payload = {
+                action: "addRating",
                 profId: id,
                 rating: score,
                 comment: comment,
                 email: email
             };
 
-            // Send to Google Sheets (Will fail silently if GOOGLE_SCRIPT_URL is invalid, but UI will still update)
-            if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec") {
+            // Send to Google Sheets (Using text/plain to bypass CORS errors)
+            if (GOOGLE_SCRIPT_URL !== "YOUR_WEB_APP_URL_HERE") {
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 }).catch(err => console.error("Sheet Sync Error:", err));
             }
 
-            // Keep local tracking active so the UI reflects the change immediately for testing
+            // Keep local tracking active
             const prof = db.professors.find(p => p.id === id);
             prof.ratings.push(score);
             if (comment !== '') prof.comments.push(comment);
@@ -573,8 +570,24 @@
                 return;
             }
 
-            // Prototype: Saves to local admin dashboard. 
-            // This can be wired to the same Google Sheet using a similar fetch() call as finalizeRating() above.
+            // Package data with the correct action tag
+            const payload = {
+                action: "addProfessor",
+                name: name,
+                uni: uni,
+                major: maj
+            };
+
+            // Send to Google Sheets (Using text/plain to bypass CORS errors)
+            if (GOOGLE_SCRIPT_URL !== "YOUR_WEB_APP_URL_HERE") {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                }).catch(err => console.error("Sheet Sync Error:", err));
+            }
+
+            // Keep local dashboard prototype active
             db.pendingProfs.push({ name, uni, major: maj });
             saveDB();
 
