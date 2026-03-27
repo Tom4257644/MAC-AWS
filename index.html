@@ -1,273 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NZ Uni Review</title>
     <style>
-        :root {
-            --primary: #0056b3;
-            --primary-dark: #003d82;
-            --bg: #f4f7f6;
-            --card-bg: #ffffff;
-            --text: #333;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-        }
-
-        /* HEADER & NAVIGATION */
-        header {
-            background: var(--primary);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        nav {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        nav button {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border: 2px solid transparent;
-            padding: 0.6rem 1.2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        nav button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        nav button.active-nav {
-            background: white;
-            color: var(--primary);
-            border-color: white;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .view-section {
-            display: none;
-        }
-
-        .view-section.active {
-            display: block;
-        }
-
-        /* FILTERS & CARDS */
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .filters select {
-            flex: 1 1 200px;
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-            background-color: white;
-        }
-
-        button.btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button.btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            margin-bottom: 1rem;
-            border: 1px solid #eaeaea;
-        }
-
-        .card h3 {
-            margin-top: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .rating-badge {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #d4af37;
-            background: #fff9e6;
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            border: 1px solid #f1e0a6;
-        }
-
-        .course-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.2rem;
-            color: #555;
-            margin-top: 1rem;
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 6px;
-        }
-
-        /* FORMS & INPUT GROUPS */
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            align-items: stretch;
-        }
-
-        .input-group input,
-        .input-group select {
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .input-group .flex-grow {
-            flex-grow: 1;
-        }
-
-        .email-verification {
-            margin-top: 15px;
-            padding: 15px;
-            background: #eef5fa;
-            border-left: 4px solid var(--primary);
-            border-radius: 4px;
-            display: none;
-        }
-
-        .disclaimer {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 8px;
-            font-style: italic;
-        }
-
-        #admin-login {
-            text-align: center;
-            margin-top: 10vh;
-        }
-
-        /* MOBILE RESPONSIVENESS */
+        :root { --primary: #0056b3; --primary-dark: #003d82; --bg: #f4f7f6; --card-bg: #ffffff; --text: #333; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        header { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        header h1 { margin: 0; font-size: 1.5rem; }
+        nav { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        nav button { background: rgba(255,255,255,0.15); color: white; border: 2px solid transparent; padding: 0.6rem 1.2rem; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.2s; }
+        nav button:hover { background: rgba(255,255,255,0.3); }
+        nav button.active-nav { background: white; color: var(--primary); border-color: white; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        .filters { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .filters select { flex: 1 1 200px; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; background: white; }
+        button.btn { background: var(--primary); color: white; border: none; padding: 0.75rem 1.2rem; font-size: 1rem; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        button.btn:hover { background: var(--primary-dark); }
+        .card { background: var(--card-bg); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 1rem; border: 1px solid #eaeaea; }
+        .card h3 { margin-top: 0; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; }
+        .rating-badge { font-size: 1.4rem; font-weight: bold; color: #d4af37; background: #fff9e6; padding: 0.2rem 0.6rem; border-radius: 4px; border: 1px solid #f1e0a6; }
+        .course-stats { display: flex; flex-wrap: wrap; gap: 1.2rem; color: #555; margin-top: 1rem; background: #f8f9fa; padding: 1rem; border-radius: 6px; }
+        .form-group { margin-bottom: 1rem; }
+        .input-group { display: flex; gap: 10px; align-items: stretch; }
+        .input-group input, .input-group select { padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+        .input-group .flex-grow { flex-grow: 1; }
+        .email-verification { margin-top: 15px; padding: 15px; background: #eef5fa; border-left: 4px solid var(--primary); border-radius: 4px; display: none; }
+        .disclaimer { font-size: 0.85rem; color: #666; margin-top: 8px; font-style: italic; }
+        #admin-login { text-align: center; margin-top: 10vh; }
         @media (max-width: 600px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-                padding: 1rem;
-            }
-
-            nav {
-                width: 100%;
-                justify-content: center;
-            }
-
-            nav button {
-                flex: 1;
-                text-align: center;
-            }
-
-            .filters {
-                flex-direction: row;
-                gap: 0.5rem;
-            }
-
-            .filters select {
-                flex: 1 1 calc(50% - 0.5rem);
-                padding: 0.5rem;
-                font-size: 0.9rem;
-            }
-
-            #course-sort-select {
-                flex: 1 1 100%;
-                background-color: #eef5fa;
-                border-color: var(--primary);
-                font-weight: bold;
-            }
-
-            .input-group {
-                flex-direction: column;
-            }
-
-            .input-group input,
-            .input-group select,
-            .input-group button {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 0.5rem;
-                font-size: 0.9rem;
-            }
-
-            .rating-row {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            .rating-row button {
-                width: auto;
-                flex-grow: 1;
-            }
-
-            .rating-badge {
-                font-size: 1.2rem;
-            }
-
-            .course-stats span {
-                font-size: 0.95rem;
-            }
+            header { flex-direction: column; text-align: center; padding: 1rem; }
+            nav { width: 100%; justify-content: center; } nav button { flex: 1; text-align: center; }
+            .filters { flex-direction: row; gap: 0.5rem; } .filters select { flex: 1 1 calc(50% - 0.5rem); padding: 0.5rem; font-size: 0.9rem; }
+            #course-sort-select { flex: 1 1 100%; }
+            .input-group { flex-direction: column; } .input-group input, .input-group select, .input-group button { width: 100%; box-sizing: border-box; }
+            .rating-row { flex-direction: row; flex-wrap: wrap; } .rating-row button { width: auto; flex-grow: 1; }
         }
     </style>
 </head>
-
 <body>
 
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
@@ -281,17 +54,15 @@
     </header>
 
     <div class="container">
-
         <div id="prof-view" class="view-section active">
             <h2>Find a Professor</h2>
             <div class="filters">
                 <select id="uni-select" onchange="updateProfs()"></select>
                 <select id="major-select" onchange="updateProfs()"></select>
             </div>
-
-            <div id="prof-list">
-                <p style="text-align:center; padding: 2rem; color: #666;">Loading professors from database...</p>
-            </div>
+            
+            <div id="sync-status" style="font-size: 0.85rem; color: #888; text-align: right; margin-bottom: 10px;">Checking for fresh data...</div>
+            <div id="prof-list"></div>
 
             <hr style="margin: 3rem 0; border: 0; border-top: 1px solid #ddd;">
 
@@ -309,7 +80,6 @@
 
         <div id="course-view" class="view-section">
             <h2>Easiest Courses Ranked</h2>
-
             <div class="filters">
                 <select id="course-subject-select" onchange="updateCourses()"></select>
                 <select id="course-level-select" onchange="updateCourses()">
@@ -319,17 +89,13 @@
                     <option value="300">300-Level</option>
                     <option value="400">400-Level</option>
                 </select>
-                <select id="course-sort-select" onchange="updateCourses()"
-                    style="background-color: #eef5fa; border-color: var(--primary); font-weight: bold;">
+                <select id="course-sort-select" onchange="updateCourses()" style="background-color: #eef5fa; border-color: var(--primary); font-weight: bold;">
                     <option value="bPlusOrHigherPercent">Rank by B+ or Higher %</option>
                     <option value="aPlusPercent">Rank by A+ %</option>
                     <option value="passPercent">Rank by Pass Rate %</option>
                 </select>
             </div>
-
-            <div id="course-list">
-                <p style="text-align:center; padding: 2rem; color: #666;">Loading courses from database...</p>
-            </div>
+            <div id="course-list"></div>
         </div>
 
         <div id="admin-view" class="view-section">
@@ -342,43 +108,20 @@
             </div>
             <div id="admin-dashboard" style="display: none;">
                 <h2>Admin Dashboard</h2>
-                <h3>Pending Professor Approvals</h3>
+                <h3>Pending Approvals</h3>
                 <div id="pending-list"></div>
             </div>
         </div>
-
     </div>
 
     <script>
-        // --- GOOGLE SHEETS API URL ---
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec";
 
-        // --- THE UNBREAKABLE SENDER FUNCTION ---
-        function sendToGoogle(dataObj) {
-            const form = document.createElement('form');
-            form.action = GOOGLE_SCRIPT_URL;
-            form.method = 'GET';
-            form.target = 'hidden_iframe';
-            form.style.display = 'none';
-
-            for (const key in dataObj) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = dataObj[key];
-                form.appendChild(input);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
-            setTimeout(() => form.remove(), 2000);
-        }
-
-        // --- 1. INITIAL DATABASE & TRACKERS ---
+        // --- 1. STATE & CACHE (Loads Instantly) ---
         const defaultData = {
             unis: ["University of Auckland", "AUT", "Victoria University of Wellington"],
-            majors: ["Statistics", "Finance", "Computer Science", "Accounting"], // Used for Professors
-            courseSubjects: [], // Dynamically populated from course data
+            majors: ["Statistics", "Finance", "Computer Science", "Accounting"], 
+            courseSubjects: [], 
             professors: [], 
             courses: [],
             pendingProfs: []
@@ -387,57 +130,48 @@
         let db = JSON.parse(localStorage.getItem('nz_uni_db')) || defaultData;
         let ratedProfs = JSON.parse(localStorage.getItem('rated_profs_tracker')) || [];
 
-        function saveDB() {
-            localStorage.setItem('nz_uni_db', JSON.stringify(db));
-        }
+        function saveDB() { localStorage.setItem('nz_uni_db', JSON.stringify(db)); }
 
-        // --- NEW: FETCH DATA FROM GOOGLE SHEETS ---
-        async function fetchProfessors() {
+        // --- 2. FAST BACKGROUND SYNC ---
+        async function fetchAllData() {
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getProfessors", { method: "GET", redirect: "follow" });
-                if (response.ok) {
-                    const data = await response.json();
-                    if(data && data.length > 0) {
-                        db.professors = data; 
-                        saveDB();
-                    }
+                const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getAllData", { method: "GET", redirect: "follow" });
+                
+                // Read as text first to catch Google Apps Script crash errors
+                const textOutput = await response.text(); 
+                
+                if (textOutput.includes("Error:") || textOutput.includes("Exception:")) {
+                    console.error("Backend Error. Make sure you deployed a NEW VERSION in Google Apps Script.", textOutput);
+                    document.getElementById('sync-status').innerText = "Backend error. Showing offline data.";
+                    return;
+                }
+
+                const data = JSON.parse(textOutput); // Safely parse JSON now
+                
+                if(data.professors || data.courses) {
+                    db.professors = data.professors || db.professors;
+                    db.courses = data.courses || db.courses;
+                    
+                    const uniqueSubjects = [...new Set(db.courses.map(c => c.subject).filter(Boolean))];
+                    if (uniqueSubjects.length > 0) db.courseSubjects = uniqueSubjects.sort();
+                    
+                    saveDB();
+                    initFilters();
+                    updateProfs();
+                    updateCourses();
+                    document.getElementById('sync-status').innerText = "Live data synced ✓";
+                    setTimeout(() => document.getElementById('sync-status').style.display = 'none', 3000);
                 }
             } catch (error) {
-                console.error("Error loading live professor data.", error);
-            } finally {
-                updateProfs();
+                console.error("Network error fetching live data. Using cached data.", error);
+                document.getElementById('sync-status').innerText = "Offline. Showing cached data.";
             }
         }
 
-        async function fetchCourses() {
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getCourses", { method: "GET", redirect: "follow" });
-                if (response.ok) {
-                    const data = await response.json();
-                    if(data && data.length > 0) {
-                        db.courses = data; 
-                        
-                        // Extract unique subjects for the dropdown
-                        const uniqueSubjects = [...new Set(data.map(c => c.subject).filter(Boolean))];
-                        if (uniqueSubjects.length > 0) {
-                            db.courseSubjects = uniqueSubjects.sort();
-                            initFilters(); // Re-render dropdowns
-                        }
-                        saveDB();
-                    }
-                }
-            } catch (error) {
-                console.error("Error loading live course data.", error);
-            } finally {
-                updateCourses();
-            }
-        }
-
-        // --- 2. ROUTING & VIEWS ---
+        // --- 3. RENDERING & UI ---
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
-
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-nav'));
             if (viewId === 'prof-view') document.getElementById('nav-prof').classList.add('active-nav');
             if (viewId === 'course-view') document.getElementById('nav-course').classList.add('active-nav');
@@ -449,15 +183,11 @@
         }
         window.addEventListener('hashchange', checkHash);
 
-        // --- 3. RENDERING LOGIC ---
         function initFilters() {
             const populate = (id, arr, defaultText = "All") => {
                 const select = document.getElementById(id);
-                if (select) {
-                    select.innerHTML = `<option value="All">${defaultText}</option>` + arr.map(item => `<option value="${item}">${item}</option>`).join('');
-                }
+                if (select) select.innerHTML = `<option value="All">${defaultText}</option>` + arr.map(item => `<option value="${item}">${item}</option>`).join('');
             };
-
             populate('uni-select', db.unis, "All Universities");
             populate('major-select', db.majors, "All Majors");
             populate('new-prof-uni', db.unis, "Select University");
@@ -468,52 +198,42 @@
         function updateProfs() {
             const uni = document.getElementById('uni-select').value;
             const maj = document.getElementById('major-select').value;
-
-            let filtered = db.professors.filter(p =>
-                (uni === 'All' || p.uni === uni) &&
-                (maj === 'All' || p.major === maj)
-            );
-
+            let filtered = db.professors.filter(p => (uni === 'All' || p.uni === uni) && (maj === 'All' || p.major === maj));
             const list = document.getElementById('prof-list');
+            
+            if (filtered.length === 0) {
+                list.innerHTML = `<p style="text-align:center; padding: 2rem; color: #666;">${db.professors.length === 0 ? "Loading database..." : "No professors found matching those filters."}</p>`;
+                return;
+            }
+
             list.innerHTML = filtered.map(p => {
                 const avg = p.ratings.length ? (p.ratings.reduce((a, b) => a + b, 0) / p.ratings.length).toFixed(1) : 'N/A';
-
-                let ratingSection = '';
-                if (ratedProfs.includes(p.id)) {
-                    ratingSection = `<p style="color: green; font-weight: bold; margin-top: 1rem;">✓ You have rated this professor.</p>`;
-                } else {
-                    ratingSection = `
-                    <div id="rate-action-${p.id}" class="input-group rating-row" style="margin-top: 1rem;">
+                let ratingSection = ratedProfs.includes(p.id) 
+                    ? `<p style="color: green; font-weight: bold; margin-top: 1rem;">✓ You have rated this professor.</p>`
+                    : `<div id="rate-action-${p.id}" class="input-group rating-row" style="margin-top: 1rem;">
                         <input type="number" id="rate-val-${p.id}" min="0" max="10" placeholder="⭐" style="width: 60px; text-align: center;">
                         <input type="text" id="rate-com-${p.id}" placeholder="Leave a comment..." class="flex-grow">
                         <button class="btn" onclick="initiateRating(${p.id})">Rate</button>
                     </div>
-                    
                     <div id="email-section-${p.id}" class="email-verification">
                         <strong>Almost done! Verify you're a student.</strong>
                         <div class="input-group" style="margin-top: 10px;">
                             <input type="email" id="email-input-${p.id}" placeholder="Your .ac.nz email address" class="flex-grow">
                             <button class="btn" onclick="finalizeRating(${p.id})">Send Link</button>
                         </div>
-                        <p class="disclaimer">We don't collect or track emails, we just don't want people rating more than once.</p>
                     </div>`;
-                }
 
                 return `
                 <div class="card">
-                    <h3>
-                        <span>${p.name}</span> 
-                        <span class="rating-badge">★ ${avg}</span>
-                    </h3>
+                    <h3><span>${p.name}</span> <span class="rating-badge">★ ${avg}</span></h3>
                     <p style="margin-top: -5px; color: #666;">${p.uni} | ${p.major}</p>
-                    
                     <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
                         <strong style="display:block; margin-bottom: 0.5rem; color: #444;">Student Comments:</strong>
                         ${p.comments.map(c => `<div style="margin-bottom: 0.3rem; font-style: italic;">"${c}"</div>`).join('') || "No comments yet. Be the first!"}
                     </div>
                     ${ratingSection}
                 </div>`;
-            }).join('') || '<p style="text-align:center; padding: 2rem; color: #666;">No professors found matching those filters.</p>';
+            }).join('');
         }
 
         function updateCourses() {
@@ -521,16 +241,16 @@
             const lvl = document.getElementById('course-level-select').value;
             const sortMetric = document.getElementById('course-sort-select').value;
 
-            let filtered = db.courses.filter(c =>
-                (subj === 'All' || c.subject === subj) &&
-                (lvl === 'All' || c.level === lvl)
-            );
-
+            let filtered = db.courses.filter(c => (subj === 'All' || c.subject === subj) && (lvl === 'All' || c.level === lvl));
             filtered.sort((a, b) => b[sortMetric] - a[sortMetric]);
-
             const list = document.getElementById('course-list');
-            list.innerHTML = filtered.map((c, index) => {
-                return `
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<p style="text-align:center; padding: 2rem; color: #666;">${db.courses.length === 0 ? "Loading database..." : "No courses found matching those filters."}</p>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map((c, index) => `
                 <div class="card">
                     <h3 style="margin-bottom: 0.5rem;">#${index + 1} &mdash; ${c.code}</h3>
                     <p style="margin: 0; color: #666;">Subject: ${c.subject} | Level: ${c.level}</p>
@@ -539,132 +259,77 @@
                         <span style="font-size: 1.1rem; color: black;"><strong>${c.aPlusPercent}%</strong> got A+</span>
                         <span style="font-size: 1.1rem; color: black;"><strong>${c.passPercent}%</strong> passed</span>
                     </div>
-                </div>`;
-            }).join('') || '<p style="text-align:center; padding: 2rem; color: #666;">No courses found matching those filters.</p>';
+                </div>`).join('');
         }
 
-        // --- 4. INTERACTIONS & LIVE GOOGLE SYNC ---
+        // --- 4. DATA WRITING (Unbreakable Iframe Method) ---
+        function sendToGoogle(dataObj) {
+            const form = document.createElement('form');
+            form.action = GOOGLE_SCRIPT_URL; form.method = 'GET'; form.target = 'hidden_iframe'; form.style.display = 'none';
+            for (const key in dataObj) {
+                const input = document.createElement('input'); input.type = 'hidden'; input.name = key; input.value = dataObj[key];
+                form.appendChild(input);
+            }
+            document.body.appendChild(form); form.submit(); setTimeout(() => form.remove(), 2000);
+        }
+
         function initiateRating(id) {
             const scoreInput = document.getElementById(`rate-val-${id}`).value;
-            if (scoreInput === '' || scoreInput < 0 || scoreInput > 10) {
-                alert("Please enter a valid rating between 0 and 10.");
-                return;
-            }
+            if (scoreInput === '' || scoreInput < 0 || scoreInput > 10) return alert("Valid rating 0-10 required.");
             document.getElementById(`rate-action-${id}`).style.display = 'none';
             document.getElementById(`email-section-${id}`).style.display = 'block';
         }
 
         function finalizeRating(id) {
             const email = document.getElementById(`email-input-${id}`).value.trim().toLowerCase();
-
-            if (!email.endsWith('.ac.nz')) {
-                alert("Please enter a valid New Zealand university email ending in .ac.nz");
-                return;
-            }
-
+            if (!email.endsWith('.ac.nz')) return alert("Needs a valid .ac.nz email");
             const score = parseInt(document.getElementById(`rate-val-${id}`).value);
             const comment = document.getElementById(`rate-com-${id}`).value.trim();
 
-            sendToGoogle({
-                action: "addRating",
-                profId: id,
-                rating: score,
-                comment: comment,
-                email: email
-            });
-
+            sendToGoogle({ action: "addRating", profId: id, rating: score, comment: comment, email: email });
+            
             const prof = db.professors.find(p => p.id === id);
-            if(prof) {
-                prof.ratings.push(score);
-                if (comment !== '') prof.comments.push(comment);
-                saveDB();
-            }
-
-            ratedProfs.push(id);
-            localStorage.setItem('rated_profs_tracker', JSON.stringify(ratedProfs));
-
-            alert(`Verification link sent to ${email}!\n\nYour rating has been sent to the admin for moderation.`);
-            updateProfs();
+            if(prof) { prof.ratings.push(score); if (comment !== '') prof.comments.push(comment); saveDB(); }
+            
+            ratedProfs.push(id); localStorage.setItem('rated_profs_tracker', JSON.stringify(ratedProfs));
+            alert(`Link sent to ${email}!\n\nRating submitted.`); updateProfs();
         }
 
         function submitNewProf() {
-            const name = document.getElementById('new-prof-name').value.trim();
-            const uni = document.getElementById('new-prof-uni').value;
-            const maj = document.getElementById('new-prof-major').value;
-
-            if (!name || uni === 'All' || maj === 'All') {
-                alert("Please type a name and select a specific University and Major to submit.");
-                return;
-            }
-
-            sendToGoogle({
-                action: "addProfessor",
-                name: name,
-                uni: uni,
-                major: maj
-            });
-
-            db.pendingProfs.push({ name, uni, major: maj });
-            saveDB();
-
-            document.getElementById('new-prof-name').value = '';
-            document.getElementById('new-prof-uni').value = 'All';
-            document.getElementById('new-prof-major').value = 'All';
-
-            document.getElementById('prof-msg').style.display = 'block';
-            setTimeout(() => document.getElementById('prof-msg').style.display = 'none', 3000);
+            const name = document.getElementById('new-prof-name').value.trim(), uni = document.getElementById('new-prof-uni').value, maj = document.getElementById('new-prof-major').value;
+            if (!name || uni === 'All' || maj === 'All') return alert("Fill all fields.");
+            sendToGoogle({ action: "addProfessor", name: name, uni: uni, major: maj });
+            db.pendingProfs.push({ name, uni, major: maj }); saveDB();
+            document.getElementById('new-prof-name').value = ''; document.getElementById('new-prof-uni').value = 'All'; document.getElementById('new-prof-major').value = 'All';
+            document.getElementById('prof-msg').style.display = 'block'; setTimeout(() => document.getElementById('prof-msg').style.display = 'none', 3000);
         }
 
-        // --- 5. LOCAL ADMIN CONTROLS (PROTOTYPE ONLY) ---
+        // --- 5. LOCAL ADMIN ---
         function checkAdmin() {
-            if (document.getElementById('admin-pass').value === 'admin') {
-                document.getElementById('admin-login').style.display = 'none';
-                document.getElementById('admin-dashboard').style.display = 'block';
-                renderAdmin();
-            } else {
-                alert("Incorrect password");
-            }
+            if (document.getElementById('admin-pass').value === 'admin') { document.getElementById('admin-login').style.display = 'none'; document.getElementById('admin-dashboard').style.display = 'block'; renderAdmin(); } 
+            else alert("Incorrect password");
         }
-
         function renderAdmin() {
-            const list = document.getElementById('pending-list');
-            list.innerHTML = db.pendingProfs.map((p, index) => `
-                <div class="card">
-                    <h4 style="margin-top: 0;">${p.name}</h4>
-                    <p>${p.uni} | ${p.major}</p>
-                    <div style="display:flex; gap: 10px;">
-                        <button class="btn" style="background: #28a745; flex: 1;" onclick="approveProf(${index})">Approve</button>
-                        <button class="btn" style="background: #dc3545; flex: 1;" onclick="rejectProf(${index})">Reject</button>
-                    </div>
-                </div>
+            document.getElementById('pending-list').innerHTML = db.pendingProfs.map((p, index) => `
+                <div class="card"><h4 style="margin-top: 0;">${p.name}</h4><p>${p.uni} | ${p.major}</p>
+                <div style="display:flex; gap: 10px;"><button class="btn" style="background: #28a745; flex: 1;" onclick="approveProf(${index})">Approve</button><button class="btn" style="background: #dc3545; flex: 1;" onclick="rejectProf(${index})">Reject</button></div></div>
             `).join('') || '<p>No pending approvals.</p>';
         }
-
         function approveProf(index) {
-            const p = db.pendingProfs[index];
-            db.professors.push({ id: Date.now(), name: p.name, uni: p.uni, major: p.major, ratings: [], comments: [] });
-            db.pendingProfs.splice(index, 1);
-            saveDB();
-            renderAdmin();
+            const p = db.pendingProfs[index]; db.professors.push({ id: Date.now(), name: p.name, uni: p.uni, major: p.major, ratings: [], comments: [] });
+            db.pendingProfs.splice(index, 1); saveDB(); renderAdmin(); updateProfs();
         }
+        function rejectProf(index) { db.pendingProfs.splice(index, 1); saveDB(); renderAdmin(); }
 
-        function rejectProf(index) {
-            db.pendingProfs.splice(index, 1);
-            saveDB();
-            renderAdmin();
-        }
-
-        // --- INIT ---
+        // --- BOOTSTRAP: Load Instantly from Cache, then Sync ---
         initFilters();
         updateProfs();
         updateCourses();
         checkHash();
         
-        // Trigger live data fetches
-        fetchProfessors();
-        fetchCourses();
+        // Fire background request to fetch fresh data
+        fetchAllData();
 
     </script>
 </body>
-
 </html>
