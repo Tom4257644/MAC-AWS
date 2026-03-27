@@ -507,7 +507,7 @@
             }).join('') || '<p style="text-align:center; padding: 2rem; color: #666;">No courses found matching those filters.</p>';
         }
 
-        // --- 4. INTERACTIONS & GOOGLE SHEETS SYNC (THE IMAGE PIXEL EXPLOIT) ---
+        // --- 4. INTERACTIONS & LIVE API SYNC ---
         function initiateRating(id) {
             const scoreInput = document.getElementById(`rate-val-${id}`).value;
             if (scoreInput === '' || scoreInput < 0 || scoreInput > 10) {
@@ -529,14 +529,16 @@
             const score = parseInt(document.getElementById(`rate-val-${id}`).value);
             const comment = document.getElementById(`rate-com-${id}`).value.trim();
 
+            // Send the clean GET request to the Google Sheet
             if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec") {
-                // THE BYPASS: Disguise the data as an image URL. 
-                // The browser will bypass security blocks and fire the data straight to Google.
                 const url = `${GOOGLE_SCRIPT_URL}?action=addRating&profId=${id}&rating=${score}&comment=${encodeURIComponent(comment)}&email=${encodeURIComponent(email)}`;
-                new Image().src = url;
+
+                fetch(url)
+                    .then(() => console.log("Rating securely sent to Google."))
+                    .catch(err => console.log("Note: Fetch executed, but log returned an error (expected behavior with Apps Script redirects)."));
             }
 
-            // Keep local tracking active for immediate UI feedback
+            // Keep local tracking active to immediately update the UI for the user
             const prof = db.professors.find(p => p.id === id);
             prof.ratings.push(score);
             if (comment !== '') prof.comments.push(comment);
@@ -559,10 +561,13 @@
                 return;
             }
 
+            // Send the clean GET request to the Google Sheet
             if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec") {
-                // THE BYPASS: Disguise the data as an image URL.
                 const url = `${GOOGLE_SCRIPT_URL}?action=addProfessor&name=${encodeURIComponent(name)}&uni=${encodeURIComponent(uni)}&major=${encodeURIComponent(maj)}`;
-                new Image().src = url;
+
+                fetch(url)
+                    .then(() => console.log("Professor securely sent to Google."))
+                    .catch(err => console.log("Note: Fetch executed, but log returned an error (expected behavior with Apps Script redirects)."));
             }
 
             // Keep local dashboard prototype active
