@@ -529,7 +529,6 @@
             const score = parseInt(document.getElementById(`rate-val-${id}`).value);
             const comment = document.getElementById(`rate-com-${id}`).value.trim();
 
-            // Package the data with the specific action tag
             const payload = {
                 action: "addRating",
                 profId: id,
@@ -538,16 +537,15 @@
                 email: email
             };
 
-            // Send to Google Sheets (Using text/plain to bypass CORS errors)
             if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec") {
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     body: JSON.stringify(payload),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 }).catch(err => console.error("Sheet Sync Error:", err));
             }
 
-            // Keep local tracking active
             const prof = db.professors.find(p => p.id === id);
             prof.ratings.push(score);
             if (comment !== '') prof.comments.push(comment);
@@ -570,7 +568,6 @@
                 return;
             }
 
-            // Package data with the correct action tag
             const payload = {
                 action: "addProfessor",
                 name: name,
@@ -578,16 +575,15 @@
                 major: maj
             };
 
-            // Send to Google Sheets (Using text/plain to bypass CORS errors)
             if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec") {
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     body: JSON.stringify(payload),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 }).catch(err => console.error("Sheet Sync Error:", err));
             }
 
-            // Keep local dashboard prototype active
             db.pendingProfs.push({ name, uni, major: maj });
             saveDB();
 
