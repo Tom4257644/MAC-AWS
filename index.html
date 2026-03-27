@@ -357,6 +357,63 @@
 
         let ratedProfs = JSON.parse(localStorage.getItem('rated_profs_tracker')) || [];
 
+        // --- FIXED FUNCTIONS ---
+
+        // --- FIXED VERSION OF YOUR CODE ---
+
+        function initiateRating(id) {
+            // You need the backticks (`) here so JS knows this is a template with a variable
+            const scoreInput = document.getElementById(`rate-val-${id}`).value;
+
+            if (scoreInput === '' || scoreInput < 0 || scoreInput > 10) {
+                alert("Please enter a valid rating between 0 and 10.");
+                return;
+            }
+
+            // This hides the rating inputs
+            const actionElement = document.getElementById(`rate-action-${id}`);
+            if (actionElement) actionElement.style.display = 'none';
+
+            // NOTE: Your current HTML doesn't have an "email-section" yet. 
+            // If you want a success message to show instead, we can target a new div.
+            alert("Rating captured! (Note: Add an email-section div to your HTML to show a custom message here).");
+        }
+
+        async function submitNewProf() {
+            const name = document.getElementById('new-prof-name').value.trim();
+            const uni = document.getElementById('new-prof-uni').value;
+            const maj = document.getElementById('new-prof-subject').value;
+
+            if (!name || uni === 'All' || maj === 'All') {
+                alert("Please type a name and select a specific University and Subject to submit.");
+                return;
+            }
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: "addProfessor",
+                        name: name,
+                        uni: uni,
+                        subject: maj
+                    })
+                });
+
+                const text = await response.text();
+                if (text.includes("Success")) {
+                    document.getElementById('prof-msg').style.display = 'block';
+                    document.getElementById('new-prof-name').value = '';
+                } else {
+                    alert("Error submitting: " + text);
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert("Failed to submit. Check your network or script deployment.");
+            }
+        }
         async function loadDataFromExcel() {
             try {
                 const response = await fetch('uniStatsData.xlsx');
