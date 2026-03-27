@@ -355,8 +355,6 @@
 
         // --- THE UNBREAKABLE SENDER FUNCTION ---
         function sendToGoogle(dataObj) {
-            if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxyDxZmkEECfhulq3eLY8zar6cbfrknhq_FuObMm0PLkaGxEylDBgA1txc9ecOngjMr/exec") return;
-
             // Creates an invisible form, fills it with data, and fires it to the iframe
             const form = document.createElement('form');
             form.action = GOOGLE_SCRIPT_URL;
